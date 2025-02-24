@@ -12,6 +12,15 @@ export const createEvent = async (req, res) => {
       location,
       organizer: req.user.id,
     });
+
+    const users = await UserActivation.find();
+    users.forEach(async (user)=>{
+      await Notification.create({
+        userId: user._id,
+        message: `New event: ${title} on ${date}`,
+      });
+    });
+
     res.status(201).json(event);
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });

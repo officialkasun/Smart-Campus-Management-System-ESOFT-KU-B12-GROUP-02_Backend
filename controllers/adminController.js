@@ -31,3 +31,8 @@ export const getAllResources = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
+
+// Manage user roles (admin only)
+export const manageRoles =  async (req,res) => {
+  req.body.
+}

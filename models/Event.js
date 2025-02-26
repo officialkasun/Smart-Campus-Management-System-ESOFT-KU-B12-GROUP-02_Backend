@@ -7,6 +7,7 @@ const eventSchema = new mongoose.Schema({
   location: { type: String, required: true },
   organizer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  attendeesCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -9,6 +9,7 @@ import resourceRoutes from './routes/resourceRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import { logger } from './utils/logger.js';
+import { authMiddleware } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(authMiddleware);
 app.use(logger);
 
 // Routes
@@ -30,5 +32,5 @@ app.use('/api/courses', courseRoutes);
 // Database connection
 connectDB(); // Call the connectDB function
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

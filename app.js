@@ -9,7 +9,6 @@ import resourceRoutes from './routes/resourceRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import { logger } from './utils/logger.js';
-import { authMiddleware } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -18,7 +17,6 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(authMiddleware);
 app.use(logger);
 
 // Routes

@@ -13,10 +13,21 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, email, password: hashedPassword, role });
+    const latestUser = await User.find().sort({date: -1}).limit(1);
+      let id;
+      if (latestUser.length == 0) {
+        id = 'U-0001';
+      } else {
+        const currentId = latestUser[0].id;
+        let number = currentId.replace('U-','');
+        number = (parseInt(number, 10) + 1).toString().padStart(4, "0")
+        id = "U-" + number;
+    }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = await User.create({ id, name, email, password: hashedPassword, role });
+
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
     res.status(201).json({ user, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
@@ -38,7 +49,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ user, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });

@@ -5,8 +5,8 @@ const eventSchema = new mongoose.Schema({
   description: { type: String, required: true },
   date: { type: Date, required: true },
   location: { type: String, required: true },
-  organizer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  organizer: { type: String, ref: 'User', required: true },
+  attendees: [{ type: String, ref: 'User' }],
   attendeesCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });

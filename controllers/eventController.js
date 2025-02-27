@@ -1,4 +1,6 @@
+import User from '../models/User.js';
 import Event from '../models/Event.js';
+import Notification from '../models/Notification.js';
 
 // Create a new event
 export const createEvent = async (req, res) => {
@@ -13,10 +15,10 @@ export const createEvent = async (req, res) => {
       organizer: req.user.id,
     });
 
-    const users = await UserActivation.find();
+    const users = await User.find();
     users.forEach(async (user)=>{
       await Notification.create({
-        userId: user._id,
+        userId: user.id,
         message: `New event: ${title} on ${date}`,
       });
     });

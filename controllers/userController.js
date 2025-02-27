@@ -26,10 +26,9 @@ export const getUserById = async (req, res) => {
 // Update user role (admin only)
 export const updateUserRole = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { role: req.body.role },
-      { new: true }
+    const user = await User.updateOne(
+      { id: req.params.id },
+      { $set: { role: req.body.role } }
     );
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

@@ -32,8 +32,21 @@ export const createEvent = async (req, res) => {
 // Get all events
 export const getEvents = async (req, res) => {
   try {
-    const events = await Event.find().populate('organizer', 'name email');
-    res.status(200).json(events);
+    const events = await Event.find();
+    const populatedEvents = await Promise.all(
+      events.map(async (event) => {
+        const organizer = await User.findOne({ id: event.organizer }).select('id name email');
+        const attendees = await User.find({ id: { $in: event.attendees } }).select('id name email');
+
+        return {
+          ...event.toObject(),
+          organizer,
+          attendees,
+        };
+      })
+    );
+
+    res.status(200).json(populatedEvents);
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }

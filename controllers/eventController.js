@@ -51,3 +51,32 @@ export const getEvents = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
+
+// Mark attendance for an event
+export const markAttendance = async (req, res) => {
+  const { eventId } = req.params;
+  const userId = req.user.id;
+  try {
+    // Find the event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.attendees.includes(userId)) {
+      return res.status(400).json({ message: 'You are already attending this event' });
+    }
+
+    // Add the user to the attendees list
+    event.attendees.push(userId);
+    event.attendeesCount += 1;
+
+    // Save the updated event
+    await event.save();
+
+    res.status(200).json({ message: 'Attendance marked successfully', event });
+  } catch (error) {
+    console.error('Error marking attendance:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};

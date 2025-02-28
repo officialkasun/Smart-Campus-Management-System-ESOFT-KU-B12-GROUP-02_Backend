@@ -73,9 +73,47 @@ export const reserveResource = async (req, res) => {
     resource.reservationExpiry = reservationExpiry;
     await resource.save();
 
+    // Emit real-time update
+    const analytics = await getResourceUsageAnalytics();
+    io.emit('resourceUpdate', analytics);
+
     res.status(200).json(resource);
   } catch (error) {
     console.error('Error reserving resource:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+export const getResourceUsageAnalytics = async (req, res) => {
+  try {
+    // Total number of resources
+    const totalResources = await Resource.countDocuments();
+
+    // Total number of reserved resources
+    const totalReservedResources = await Resource.countDocuments({ availability: false });
+
+    // Most reserved resources
+    const mostReservedResources = await Resource.aggregate([
+      {
+        $group: {
+          _id: '$type',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    // Resource utilization percentage
+    const resourceUtilization = (totalReservedResources / totalResources) * 100;
+
+    res.status(200).json({
+      totalResources,
+      totalReservedResources,
+      mostReservedResources,
+      resourceUtilization: `${resourceUtilization.toFixed(2)}%`,
+    });
+  } catch (error) {
+    console.error('Error fetching resource usage analytics:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };

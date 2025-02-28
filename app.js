@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
 import connectDB from './config/db.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
@@ -29,32 +31,56 @@ app.use('/api/events', eventRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/courses', courseRoutes);
-app.use('/api/notifications',notificationRoutes);
+app.use('/api/notifications', notificationRoutes);
 
-// Database connection
-connectDB(); 
+connectDB();
 
-cron.schedule('* * * * *', async () => {
-    try {
-      const now = new Date();
-  
-      const expiredResources = await Resource.find({
-        availability: false,
-        reservationExpiry: { $lte: now },
-      });
-  
-      for (const resource of expiredResources) {
-        resource.availability = true;
-        resource.reservedBy = null;
-        resource.reservationDate = null;
-        resource.reservationExpiry = null;
-        await resource.save();
-        console.log(`Resource ${resource.name} is now available.`);
-      }
-    } catch (error) {
-      console.error('Error updating expired reservations:', error);
-    }
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
 });
 
-const PORT = process.env.PORT;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  socket.on('sendMessage', (message) => {
+    console.log('Received message:', message);
+    io.emit('receiveMessage', message); 
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
+// Cron job: Release expired resource reservations every minute
+cron.schedule('* * * * *', async () => {
+  try {
+    const now = new Date();
+
+    const expiredResources = await Resource.find({
+      availability: false,
+      reservationExpiry: { $lte: now },
+    });
+
+    for (const resource of expiredResources) {
+      resource.availability = true;
+      resource.reservedBy = null;
+      resource.reservationDate = null;
+      resource.reservationExpiry = null;
+      await resource.save();
+
+      console.log(`Resource ${resource.name} is now available.`);
+
+      io.emit('resourceUpdated', { resourceId: resource._id, name: resource.name, status: 'available' });
+    }
+  } catch (error) {
+    console.error('Error updating expired reservations:', error);
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));

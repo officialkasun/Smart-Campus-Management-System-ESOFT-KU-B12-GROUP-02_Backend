@@ -1,5 +1,5 @@
 import express from 'express';
-import { reserveResource, addResource, getResources, getAvailableResources } from '../controllers/resourceController.js';
+import { reserveResource, addResource, getResources, getAvailableResources, getResourceUsageAnalytics } from '../controllers/resourceController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
 
@@ -9,5 +9,6 @@ router.post('/', authMiddleware, roleMiddleware(['admin']), addResource);
 router.post('/reserve', authMiddleware, reserveResource);
 router.get('/', authMiddleware, getResources);
 router.get('/available', authMiddleware, getAvailableResources);
+router.get('/analytics', authMiddleware, roleMiddleware(['admin']), getResourceUsageAnalytics);
 
 export default router;

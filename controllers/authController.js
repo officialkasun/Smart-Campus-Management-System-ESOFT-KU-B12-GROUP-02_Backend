@@ -13,7 +13,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const latestUser = await User.find().sort({date: -1}).limit(1);
+    const latestUser = await User.find().sort({_id: -1}).limit(1);
       let id;
       if (latestUser.length == 0) {
         id = 'U-0001';

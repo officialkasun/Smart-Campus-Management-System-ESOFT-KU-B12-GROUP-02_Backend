@@ -1,10 +1,12 @@
 import User from '../models/User.js';
 import Event from '../models/Event.js';
 import Notification from '../models/Notification.js';
+import { sendEmail } from '../utils/emailSender.js';
 
 // Create a new event
 export const createEvent = async (req, res) => {
   const { title, description, date, location } = req.body;
+  const organizerId = req.user.id;
 
   try {
     const event = await Event.create({
@@ -12,15 +14,23 @@ export const createEvent = async (req, res) => {
       description,
       date,
       location,
-      organizer: req.user.id,
+      organizer: organizerId,
     });
 
-    const users = await User.find();
-    users.forEach(async (user)=>{
+    const users_n = await User.find();
+    users_n.forEach(async (user)=>{
       await Notification.create({
         userId: user.id,
         message: `New event: ${title} on ${date}`,
       });
+    });
+
+    const users_m = await User.find({}, 'email');
+    const emailSubject = `New Event: ${title}`;
+    const emailText = `A new event has been created:\n\nTitle: ${title}\nDescription: ${description}\nDate: ${date}\nLocation: ${location}\nThis is auto generated email. Please do not reply.`;
+
+    users_m.forEach((user) => {
+      sendEmail(user.email, emailSubject, emailText);
     });
 
     res.status(201).json(event);

@@ -6,7 +6,9 @@ import { sendEmail } from '../utils/emailSender.js';
 // Create a new event
 export const createEvent = async (req, res) => {
   const { title, description, date, location } = req.body;
-  const organizerId = req.user.id;
+  const organizerId = req.user._id; 
+
+  console.log('Authenticated User:', req.user);
 
   try {
     const event = await Event.create({
@@ -17,24 +19,24 @@ export const createEvent = async (req, res) => {
       organizer: organizerId,
     });
 
-    const users_n = await User.find();
-    users_n.forEach(async (user)=>{
+    const users = await User.find();
+    users.forEach(async (user) => {
       await Notification.create({
-        userId: user.id,
+        userId: user._id,
         message: `New event: ${title} on ${date}`,
       });
     });
 
-    const users_m = await User.find({}, 'email');
     const emailSubject = `New Event: ${title}`;
     const emailText = `A new event has been created:\n\nTitle: ${title}\nDescription: ${description}\nDate: ${date}\nLocation: ${location}\nThis is auto generated email. Please do not reply.`;
 
-    users_m.forEach((user) => {
+    users.forEach((user) => {
       sendEmail(user.email, emailSubject, emailText);
     });
 
     res.status(201).json(event);
   } catch (error) {
+    console.error('Error creating event:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -42,22 +44,13 @@ export const createEvent = async (req, res) => {
 // Get all events
 export const getEvents = async (req, res) => {
   try {
-    const events = await Event.find();
-    const populatedEvents = await Promise.all(
-      events.map(async (event) => {
-        const organizer = await User.findOne({ id: event.organizer }).select('id name email');
-        const attendees = await User.find({ id: { $in: event.attendees } }).select('id name email');
+    const events = await Event.find()
+      .populate('organizer', 'name email') 
+      .populate('attendees', 'name email');
 
-        return {
-          ...event.toObject(),
-          organizer,
-          attendees,
-        };
-      })
-    );
-
-    res.status(200).json(populatedEvents);
+    res.status(200).json(events);
   } catch (error) {
+    console.error('Error fetching events:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -65,9 +58,9 @@ export const getEvents = async (req, res) => {
 // Mark attendance for an event
 export const markAttendance = async (req, res) => {
   const { eventId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user._id;
+
   try {
-    // Find the event
     const event = await Event.findById(eventId);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
@@ -77,11 +70,9 @@ export const markAttendance = async (req, res) => {
       return res.status(400).json({ message: 'You are already attending this event' });
     }
 
-    // Add the user to the attendees list
-    event.attendees.push(userId);
+    event.attendees.push(userId); 
     event.attendeesCount += 1;
 
-    // Save the updated event
     await event.save();
 
     res.status(200).json({ message: 'Attendance marked successfully', event });
@@ -94,19 +85,9 @@ export const markAttendance = async (req, res) => {
 //Get events with attendance
 export const getEventsWithAttendance = async (req, res) => {
   try {
-    const events = await Event.find();
+    const events = await Event.find().populate('attendees', 'name email');
 
-    const populatedEvents = await Promise.all(
-      events.map(async (event) => {
-        const attendees = await User.find({ id: { $in: event.attendees } }).select('id name email');
-        return {
-          ...event.toObject(),
-          attendees,
-        };
-      })
-    );
-
-    res.status(200).json(populatedEvents);
+    res.status(200).json(events);
   } catch (error) {
     console.error('Error fetching events:', error);
     res.status(500).json({ message: 'Something went wrong' });

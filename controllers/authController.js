@@ -27,7 +27,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({ id, name, email, password: hashedPassword, role });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({_id: user._id, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
     res.status(201).json({ user, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
@@ -49,7 +49,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({_id: user._id, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ user, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });

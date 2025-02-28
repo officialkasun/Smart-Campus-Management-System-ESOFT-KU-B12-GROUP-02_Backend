@@ -5,7 +5,8 @@ const resourceSchema = new mongoose.Schema({
   type: { type: String, enum: ['classroom', 'equipment', 'lab'], required: true },
   availability: { type: Boolean, default: true },
   reservedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  reservationDate: { type: Date },
+  reservationDate: { type: Date, default: Date.now },
+  reservationExpiry: { type: Date },
   createdAt: { type: Date, default: Date.now },
 });
 

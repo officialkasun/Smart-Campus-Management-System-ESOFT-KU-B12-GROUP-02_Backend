@@ -93,3 +93,43 @@ export const getEventsWithAttendance = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
+
+// Get event attendance analytics
+export const getEventAttendanceAnalytics = async (req, res) => {
+  try {
+    const totalEvents = await Event.countDocuments();
+
+    const totalAttendees = await Event.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAttendees: { $sum: '$attendeesCount' },
+        },
+      },
+    ]);
+
+    const mostAttendedEvents = await Event.aggregate([
+      {
+        $sort: { attendeesCount: -1 },
+      },
+      {
+        $limit: 5, 
+      },
+      {
+        $project: {
+          title: 1,
+          attendeesCount: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      totalEvents,
+      totalAttendees: totalAttendees[0]?.totalAttendees || 0,
+      mostAttendedEvents,
+    });
+  } catch (error) {
+    console.error('Error fetching event attendance analytics:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};

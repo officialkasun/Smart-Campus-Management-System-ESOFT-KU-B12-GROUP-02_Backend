@@ -6,7 +6,6 @@ const resourceSchema = new mongoose.Schema({
   availability: { type: Boolean, default: true },
   reservedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   reservationDate: { type: Date },
-  usageCount: { type: Number , deefault: 0},
   createdAt: { type: Date, default: Date.now },
 });
 

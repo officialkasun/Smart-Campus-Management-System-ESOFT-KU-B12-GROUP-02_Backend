@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUsers, getUserById, updateUserRole } from '../controllers/userController.js';
+import { getUsers, getUserById, updateUserRole, getUserActivityAnalytics } from '../controllers/userController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
 
@@ -8,5 +8,6 @@ const router = express.Router();
 router.get('/', authMiddleware, roleMiddleware(['admin']), getUsers);
 router.get('/:id', authMiddleware, getUserById);
 router.put('/:id/role', authMiddleware, roleMiddleware(['admin']), updateUserRole);
+router.get('/analytics', authMiddleware, roleMiddleware(['admin']), getUserActivityAnalytics);
 
 export default router;

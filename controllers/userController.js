@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Event from '../models/Event.js';
 
 // Get all users
 export const getUsers = async (req, res) => {
@@ -35,6 +36,42 @@ export const updateUserRole = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Get user activity analytics
+export const getUserActivityAnalytics = async (req, res) => {
+  try {
+    const mostActiveUsers = await User.aggregate([
+      {
+        $lookup: {
+          from: 'events',
+          localField: '_id',
+          foreignField: 'attendees',
+          as: 'attendedEvents',
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          attendedEventsCount: { $size: '$attendedEvents' },
+        },
+      },
+      {
+        $sort: { attendedEventsCount: -1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]);
+
+    res.status(200).json({
+      mostActiveUsers,
+    });
+  } catch (error) {
+    console.error('Error fetching user activity analytics:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };

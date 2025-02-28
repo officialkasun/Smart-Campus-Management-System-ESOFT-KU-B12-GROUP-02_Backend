@@ -90,3 +90,25 @@ export const markAttendance = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
+
+//Get events with attendance
+export const getEventsWithAttendance = async (req, res) => {
+  try {
+    const events = await Event.find();
+
+    const populatedEvents = await Promise.all(
+      events.map(async (event) => {
+        const attendees = await User.find({ id: { $in: event.attendees } }).select('id name email');
+        return {
+          ...event.toObject(),
+          attendees,
+        };
+      })
+    );
+
+    res.status(200).json(populatedEvents);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};

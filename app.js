@@ -12,6 +12,7 @@ import resourceRoutes from './routes/resourceRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import scheduleRoutes from './routes/scheduleRoutes.js';
 import Resource from './models/Resource.js';
 import { logger } from './utils/logger.js';
 
@@ -32,6 +33,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/schedules', scheduleRoutes);
 
 connectDB();
 

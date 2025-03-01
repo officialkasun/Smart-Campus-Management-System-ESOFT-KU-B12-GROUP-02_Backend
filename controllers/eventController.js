@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Event from '../models/Event.js';
 import Notification from '../models/Notification.js';
 import { sendEmail } from '../utils/emailSender.js';
+import { getUserActivityAnalytics } from '../controllers/userController.js';
 
 // Create a new event
 export const createEvent = async (req, res) => {
@@ -18,6 +19,9 @@ export const createEvent = async (req, res) => {
       location,
       organizer: organizerId,
     });
+
+    const analytics = await getEventAttendanceAnalytics();
+    io.emit('eventUpdate', analytics);
 
     const users = await User.find();
     users.forEach(async (user) => {
@@ -74,6 +78,12 @@ export const markAttendance = async (req, res) => {
     event.attendeesCount += 1;
 
     await event.save();
+
+    // Emit real-time updates
+    const eventAnalytics = await getEventAttendanceAnalytics();
+    const userAnalytics = await getUserActivityAnalytics();
+    io.emit('eventUpdate', eventAnalytics);
+    io.emit('userUpdate', userAnalytics);
 
     res.status(200).json({ message: 'Attendance marked successfully', event });
   } catch (error) {

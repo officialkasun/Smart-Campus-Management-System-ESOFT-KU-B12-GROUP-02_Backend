@@ -3,6 +3,47 @@ import Event from '../models/Event.js';
 import Notification from '../models/Notification.js';
 import { sendEmail } from '../utils/emailSender.js';
 import { getUserActivityAnalytics } from '../controllers/userController.js';
+import { getIO } from '../utils/socket.js'; 
+
+// Helper function to get event attendance analytics without requiring req/res
+export const getEventAnalyticsData = async () => {
+  try {
+    const totalEvents = await Event.countDocuments();
+
+    const totalAttendees = await Event.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAttendees: { $sum: '$attendeesCount' },
+        },
+      },
+    ]);
+
+    const mostAttendedEvents = await Event.aggregate([
+      {
+        $sort: { attendeesCount: -1 },
+      },
+      {
+        $limit: 5, 
+      },
+      {
+        $project: {
+          title: 1,
+          attendeesCount: 1,
+        },
+      },
+    ]);
+
+    return {
+      totalEvents,
+      totalAttendees: totalAttendees[0]?.totalAttendees || 0,
+      mostAttendedEvents,
+    };
+  } catch (error) {
+    console.error('Error fetching event attendance analytics data:', error);
+    throw error;
+  }
+};
 
 // Create a new event
 export const createEvent = async (req, res) => {
@@ -20,7 +61,9 @@ export const createEvent = async (req, res) => {
       organizer: organizerId,
     });
 
-    const analytics = await getEventAttendanceAnalytics();
+    // Use the helper function instead of the route handler
+    const analytics = await getEventAnalyticsData();
+    const io = getIO(); // Get the Socket.io instance
     io.emit('eventUpdate', analytics);
 
     const users = await User.find();
@@ -79,9 +122,10 @@ export const markAttendance = async (req, res) => {
 
     await event.save();
 
-    // Emit real-time updates
-    const eventAnalytics = await getEventAttendanceAnalytics();
+    // Use the helper function instead of the route handler
+    const eventAnalytics = await getEventAnalyticsData();
     const userAnalytics = await getUserActivityAnalytics();
+    const io = getIO(); // Get the Socket.io instance
     io.emit('eventUpdate', eventAnalytics);
     io.emit('userUpdate', userAnalytics);
 
@@ -92,7 +136,7 @@ export const markAttendance = async (req, res) => {
   }
 };
 
-//Get events with attendance
+// Get events with attendance
 export const getEventsWithAttendance = async (req, res) => {
   try {
     const events = await Event.find().populate('attendees', 'name email');
@@ -104,40 +148,11 @@ export const getEventsWithAttendance = async (req, res) => {
   }
 };
 
-// Get event attendance analytics
+// Get event attendance analytics (route handler)
 export const getEventAttendanceAnalytics = async (req, res) => {
   try {
-    const totalEvents = await Event.countDocuments();
-
-    const totalAttendees = await Event.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalAttendees: { $sum: '$attendeesCount' },
-        },
-      },
-    ]);
-
-    const mostAttendedEvents = await Event.aggregate([
-      {
-        $sort: { attendeesCount: -1 },
-      },
-      {
-        $limit: 5, 
-      },
-      {
-        $project: {
-          title: 1,
-          attendeesCount: 1,
-        },
-      },
-    ]);
-
-    res.status(200).json({
-      totalEvents,
-      totalAttendees: totalAttendees[0]?.totalAttendees || 0,
-      mostAttendedEvents,
-    });
+    const analyticsData = await getEventAnalyticsData();
+    res.status(200).json(analyticsData);
   } catch (error) {
     console.error('Error fetching event attendance analytics:', error);
     res.status(500).json({ message: 'Something went wrong' });

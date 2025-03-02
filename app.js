@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import cron from 'node-cron';
 import connectDB from './config/db.js';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
+import { initIO, getIO } from './utils/socket.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
@@ -46,25 +46,8 @@ app.use('/api/schedules', scheduleRoutes);
 connectDB();
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-
-io.on('connection', (socket) => {
-  console.log('New client connected:', socket.id);
-
-  socket.on('sendMessage', (message) => {
-    console.log('Received message:', message);
-    io.emit('receiveMessage', message); 
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
+// Initialize Socket.io
+const io = initIO(httpServer);
 
 // Cron job: Release expired resource reservations every minute
 cron.schedule('* * * * *', async () => {
@@ -85,6 +68,8 @@ cron.schedule('* * * * *', async () => {
 
       console.log(`Resource ${resource.name} is now available.`);
 
+      // Use getIO to get the socket instance
+      const io = getIO();
       io.emit('resourceUpdated', { resourceId: resource._id, name: resource.name, status: 'available' });
     }
   } catch (error) {

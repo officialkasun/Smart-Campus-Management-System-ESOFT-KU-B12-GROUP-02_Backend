@@ -61,9 +61,9 @@ export const createEvent = async (req, res) => {
       organizer: organizerId,
     });
 
-    // Use the helper function instead of the route handler
+    // Use the helper function 
     const analytics = await getEventAnalyticsData();
-    const io = getIO(); // Get the Socket.io instance
+    const io = getIO(); 
     io.emit('eventUpdate', analytics);
 
     const users = await User.find();
@@ -91,10 +91,8 @@ export const createEvent = async (req, res) => {
 // Get all events
 export const getEvents = async (req, res) => {
   try {
-    const events = await Event.find()
-      .populate('organizer', 'name email') 
-      .populate('attendees', 'name email');
-
+    const events = await Event.find().populate('organizer', 'name email');
+  
     res.status(200).json(events);
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -138,7 +136,9 @@ export const markAttendance = async (req, res) => {
 // Get events with attendance
 export const getEventsWithAttendance = async (req, res) => {
   try {
-    const events = await Event.find().populate('attendees', 'name email');
+    const events = await Event.find()
+      .populate('organizer', 'name email') 
+      .populate('attendees', 'name email');
 
     res.status(200).json(events);
   } catch (error) {

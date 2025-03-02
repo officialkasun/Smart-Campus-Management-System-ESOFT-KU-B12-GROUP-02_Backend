@@ -48,7 +48,7 @@ export const getAvailableResources = async (req, res) => {
 // Reserve a resource
 export const reserveResource = async (req, res) => {
   const { resourceId, reservationDate, reservationTime } = req.body;
-  const userId = req.user._id; // Use ObjectId
+  const userId = req.user._id; 
 
   try {
     const resource = await Resource.findById(resourceId);
@@ -84,7 +84,7 @@ export const reserveResource = async (req, res) => {
   }
 };
 
-// Gwt resource analytics
+// Get resource analytics
 export const getResourceUsageAnalytics = async (req, res) => {
   try {
     // Total number of resources

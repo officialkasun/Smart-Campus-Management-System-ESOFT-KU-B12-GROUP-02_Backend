@@ -13,7 +13,7 @@ export const getUsers = async (req, res) => {
 // Get a single user by ID
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findOne({id: req.params.id});
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -30,10 +30,12 @@ export const updateUserRole = async (req, res) => {
       { id: req.params.id },
       { $set: { role: req.body.role } }
     );
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+
+    if (user.modifiedCount === 0) {
+      return res.status(404).json({ message: 'Role already the same' });
     }
-    res.status(200).json(user);
+
+    res.status(200).json({ message: 'The user role has been updated', user });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }

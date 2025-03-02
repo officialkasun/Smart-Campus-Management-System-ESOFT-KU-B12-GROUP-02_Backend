@@ -1,5 +1,4 @@
 import User from '../models/User.js';
-import Event from '../models/Event.js';
 
 // Get all users
 export const getUsers = async (req, res) => {

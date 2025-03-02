@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import Course from '../models/Course.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import { sendEmail } from '../utils/emailSender.js';
 
 // Create a new course (instructor only) with file upload
@@ -27,6 +28,14 @@ export const createCourse = async (req, res) => {
       schedule,
       instructor: instructorId,
       lectureMaterials, 
+    });
+
+    const users = await User.find();
+    users.forEach(async (user) => {
+      await Notification.create({
+        userId: user._id,
+        message: `New course: ${course.name} (${course.code}) has been created. Check it out now!`,
+      });
     });
 
     res.status(201).json(course);

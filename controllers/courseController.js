@@ -48,8 +48,8 @@ export const getCourses = async (req, res) => {
 
 // Register for a course
 export const registerForCourse = async (req, res) => {
-  const { courseId } = req.body;
-  const studentId = req.user.id;
+  const courseId = req.params.courseId;
+  const studentId = req.user._id;
 
   try {
     const course = await Course.findById(courseId);
@@ -57,17 +57,18 @@ export const registerForCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Check if the student is already registered
     if (course.students.includes(studentId)) {
       return res.status(400).json({ message: 'You are already registered for this course' });
     }
 
-    // Add the student to the course
     course.students.push(studentId);
     await course.save();
 
-    // Add the course to the student's schedule
     const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
     student.courses.push(courseId);
     await student.save();
 
@@ -78,6 +79,7 @@ export const registerForCourse = async (req, res) => {
 
     res.status(200).json({ message: 'Course registration successful', course });
   } catch (error) {
+    console.error('Error in registerForCourse:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };

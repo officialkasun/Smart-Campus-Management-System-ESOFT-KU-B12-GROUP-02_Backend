@@ -6,10 +6,16 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.get('/', authMiddleware, getCourses);
-router.post('/register', authMiddleware, registerForCourse);
 router.get('/schedule', authMiddleware, getStudentSchedule);
-router.post('/', upload.array('lectureMaterials', 5), createCourse);
+router.post('/', upload.array('lectureMaterials', 5), authMiddleware, createCourse);
 router.get('/:courseId', authMiddleware, getCourseById);
+router.post('/:courseId/register', authMiddleware, (req, res, next) => {
+    // Explicitly ignore the request body
+    if (req.body && Object.keys(req.body).length > 0) {
+      return res.status(400).json({ message: 'This endpoint does not accept a request body' });
+    }
+    next();
+  }, registerForCourse);
 router.get('/:courseId/lecture/:filename', authMiddleware, getLectureMaterial);
 
 export default router;

@@ -1,5 +1,6 @@
 import moment from 'moment-timezone';
 import Resource from '../models/Resource.js';
+import { getIO } from '../utils/socket.js';
 
 // Add a new resource (admin only)
 export const addResource = async (req, res) => {
@@ -45,47 +46,8 @@ export const getAvailableResources = async (req, res) => {
   }
 };
 
-// Reserve a resource
-export const reserveResource = async (req, res) => {
-  const { resourceId, reservationDate, reservationTime } = req.body;
-  const userId = req.user._id; 
-
-  try {
-    const resource = await Resource.findById(resourceId);
-    if (!resource) {
-      return res.status(404).json({ message: 'Resource not found' });
-    }
-
-    if (!resource.availability) {
-      return res.status(400).json({ message: 'Resource is already reserved' });
-    }
-
-    const combinedDateTime = `${reservationDate}T${reservationTime}:00`;
-
-    const colomboTime = moment(combinedDateTime).tz('Asia/Colombo').toISOString();
-
-    const reservationExpiry = new Date(colomboTime);
-    reservationExpiry.setDate(reservationExpiry.getDate() + 1);  
-
-    resource.availability = false;
-    resource.reservedBy = userId; 
-    resource.reservationDate = reservationDate;
-    resource.reservationExpiry = reservationExpiry;
-    await resource.save();
-
-    // Emit real-time update
-    const analytics = await getResourceUsageAnalytics();
-    io.emit('resourceUpdate', analytics);
-
-    res.status(200).json(resource);
-  } catch (error) {
-    console.error('Error reserving resource:', error);
-    res.status(500).json({ message: 'Something went wrong' });
-  }
-};
-
-// Get resource analytics
-export const getResourceUsageAnalytics = async (req, res) => {
+// Helper function to get resource usage analytics data without requiring req/res
+export const getResourceUsageAnalyticsData = async () => {
   try {
     // Total number of resources
     const totalResources = await Resource.countDocuments();
@@ -107,12 +69,63 @@ export const getResourceUsageAnalytics = async (req, res) => {
     // Resource utilization percentage
     const resourceUtilization = (totalReservedResources / totalResources) * 100;
 
-    res.status(200).json({
+    return {
       totalResources,
       totalReservedResources,
       mostReservedResources,
       resourceUtilization: `${resourceUtilization.toFixed(2)}%`,
-    });
+    };
+  } catch (error) {
+    console.error('Error fetching resource usage analytics data:', error);
+    throw error;
+  }
+};
+
+// Reserve a resource
+export const reserveResource = async (req, res) => {
+  const { reservationDate, reservationTime } = req.body;
+  const resourceId = req.params.resId;
+  const userId = req.user._id;
+
+  try {
+    const resource = await Resource.findById(resourceId);
+    if (!resource) {
+      return res.status(404).json({ message: 'Resource not found' });
+    }
+
+    if (!resource.availability) {
+      return res.status(400).json({ message: 'Resource is already reserved' });
+    }
+
+    const formattedTime = reservationTime.length === 5 ? `${reservationTime}:00` : reservationTime; // Add seconds if missing
+    const combinedDateTime = `${reservationDate}T${formattedTime}`;
+
+    const colomboTime = moment.tz(combinedDateTime, 'Asia/Colombo');
+
+    const reservationExpiry = colomboTime.clone().add(1, 'day').toDate();
+
+    resource.availability = false;
+    resource.reservedBy = userId;
+    resource.reservationDate = colomboTime.toDate(); // Save the full date and time
+    resource.reservationExpiry = reservationExpiry;
+    await resource.save();
+
+    const analytics = await getResourceUsageAnalyticsData();
+    const io = getIO();
+    io.emit('resourceUpdate', analytics);
+
+    res.status(200).json(resource);
+  } catch (error) {
+    console.error('Error reserving resource:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Get resource analytics (route handler)
+export const getResourceUsageAnalytics = async (req, res) => {
+  try {
+    const analyticsData = await getResourceUsageAnalyticsData();
+    res.status(200).json(analyticsData);
   } catch (error) {
     console.error('Error fetching resource usage analytics:', error);
     res.status(500).json({ message: 'Something went wrong' });

@@ -38,7 +38,7 @@ export const createCourse = async (req, res) => {
       });
     });
 
-    res.status(201).json(course);
+    res.status(201).json({ message: "A new Course has been created",course});
   } catch (error) {
     console.error('Error creating course:', error);
     res.status(500).json({ message: 'Something went wrong' });

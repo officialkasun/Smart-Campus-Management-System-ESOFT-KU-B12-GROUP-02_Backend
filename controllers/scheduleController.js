@@ -46,28 +46,28 @@ export const updateEventInSchedule = async (req, res) => {
     const { title, description, date, location, type } = req.body;
   
     try {
-        const schedule = await Schedule.findOne({ studentId });
-        if (!schedule) {
-            return res.status(404).json({ message: 'Schedule not found' });
-        }
-    
-        const event = schedule.events.id(eventId);
-        if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
-        }
-    
-        event.title = title || event.title;
-        event.description = description || event.description;
-        event.date = date || event.date;
-        event.location = location || event.location;
-        event.type = type || event.type;
-    
-        await schedule.save();
-    
-        res.status(200).json(schedule);
+      const schedule = await Schedule.findOne({ studentId });
+      if (!schedule) {
+        return res.status(404).json({ message: 'Schedule not found' });
+      }
+  
+      const event = schedule.events.id(eventId);
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+  
+      if (title !== undefined) event.title = title;
+      if (description !== undefined) event.description = description;
+      if (date !== undefined) event.date = date;
+      if (location !== undefined) event.location = location;
+      if (type !== undefined) event.type = type;
+  
+      await schedule.save();
+  
+      res.status(200).json({ message: "Your schedule has been updated.",schedule});
     } catch (error) {
-        console.error('Error updating event in schedule:', error);
-        res.status(500).json({ message: 'Something went wrong' });
+      console.error('Error updating event in schedule:', error);
+      res.status(500).json({ message: 'Something went wrong' });
     }
 };
 
@@ -84,7 +84,7 @@ export const deleteEventFromSchedule = async (req, res) => {
         schedule.events.pull(eventId);
         await schedule.save();
   
-        res.status(200).json(schedule);
+        res.status(200).json({message: "The event has been deleted.",schedule});
     } catch (error) {
         console.error('Error deleting event from schedule:', error);
         res.status(500).json({ message: 'Something went wrong' });

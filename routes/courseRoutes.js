@@ -2,12 +2,13 @@ import express from 'express';
 import upload from '../utils/multerConfig.js';
 import { getCourses, registerForCourse, getStudentSchedule, createCourse, getCourseById, getLectureMaterial } from '../controllers/courseController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
+import {roleMiddleware } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', authMiddleware, getCourses);
 router.get('/schedule', authMiddleware, getStudentSchedule);
-router.post('/', upload.array('lectureMaterials', 5), authMiddleware, createCourse);
+router.post('/', upload.array('lectureMaterials', 5), authMiddleware,roleMiddleware(['lecturer']), createCourse);
 router.get('/:courseId', authMiddleware, getCourseById);
 router.post('/:courseId/register', authMiddleware, (req, res, next) => {
     // Explicitly ignore the request body

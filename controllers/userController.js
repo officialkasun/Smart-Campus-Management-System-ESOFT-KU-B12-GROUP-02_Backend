@@ -68,6 +68,10 @@ export const getUserActivityAnalytics = async (req, res) => {
       },
     ]);
 
+    if (!mostActiveUsers.length) {
+      return res.status(404).json({ message: 'No active users found' });
+    }
+
     res.status(200).json({
       mostActiveUsers,
     });

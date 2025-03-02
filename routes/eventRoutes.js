@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.post('/', authMiddleware, createEvent);
 router.get('/', authMiddleware, getEvents);
-router.post('/:eventId/attend', authMiddleware, markAttendance);
 router.get('/with-attendance', authMiddleware, roleMiddleware(['admin']), getEventsWithAttendance);
 router.get('/analytics', authMiddleware, roleMiddleware(['admin']), getEventAttendanceAnalytics);
+router.post('/:eventId/attend', authMiddleware, markAttendance);
 
 export default router;

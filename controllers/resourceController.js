@@ -84,6 +84,7 @@ export const reserveResource = async (req, res) => {
   }
 };
 
+// Gwt resource analytics
 export const getResourceUsageAnalytics = async (req, res) => {
   try {
     // Total number of resources

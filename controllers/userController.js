@@ -41,8 +41,8 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
-// Get user activity analytics
-export const getUserActivityAnalytics = async (req, res) => {
+// Helper function to get user activity analytics data without requiring req/res
+export const getUserActivityAnalyticsData = async () => {
   try {
     const mostActiveUsers = await User.aggregate([
       {
@@ -68,13 +68,25 @@ export const getUserActivityAnalytics = async (req, res) => {
       },
     ]);
 
-    if (!mostActiveUsers.length) {
+    return {
+      mostActiveUsers: mostActiveUsers.length ? mostActiveUsers : [],
+    };
+  } catch (error) {
+    console.error('Error fetching user activity analytics data:', error);
+    throw error;
+  }
+};
+
+// Get user activity analytics (route handler)
+export const getUserActivityAnalytics = async (req, res) => {
+  try {
+    const analyticsData = await getUserActivityAnalyticsData();
+    
+    if (!analyticsData.mostActiveUsers.length) {
       return res.status(404).json({ message: 'No active users found' });
     }
 
-    res.status(200).json({
-      mostActiveUsers,
-    });
+    res.status(200).json(analyticsData);
   } catch (error) {
     console.error('Error fetching user activity analytics:', error);
     res.status(500).json({ message: 'Something went wrong' });

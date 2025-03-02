@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import Event from '../models/Event.js';
 import Notification from '../models/Notification.js';
 import { sendEmail } from '../utils/emailSender.js';
-import { getUserActivityAnalytics } from '../controllers/userController.js';
+import { getUserActivityAnalyticsData } from '../controllers/userController.js';
 import { getIO } from '../utils/socket.js'; 
 
 // Helper function to get event attendance analytics without requiring req/res
@@ -122,10 +122,9 @@ export const markAttendance = async (req, res) => {
 
     await event.save();
 
-    // Use the helper function instead of the route handler
     const eventAnalytics = await getEventAnalyticsData();
-    const userAnalytics = await getUserActivityAnalytics();
-    const io = getIO(); // Get the Socket.io instance
+    const userAnalytics = await getUserActivityAnalyticsData();
+    const io = getIO(); 
     io.emit('eventUpdate', eventAnalytics);
     io.emit('userUpdate', userAnalytics);
 

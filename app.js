@@ -17,7 +17,7 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
 import Resource from './models/Resource.js';
 import { logger } from './utils/logger.js';
-//testing by dilhan
+
 dotenv.config();
 //Test by Kasuns
 const __filename = fileURLToPath(import.meta.url);

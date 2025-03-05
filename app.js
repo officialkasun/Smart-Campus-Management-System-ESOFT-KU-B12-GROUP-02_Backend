@@ -19,7 +19,7 @@ import Resource from './models/Resource.js';
 import { logger } from './utils/logger.js';
 //testing by dilhan
 dotenv.config();
-//Test by Kasun
+//Test by Kasuns
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

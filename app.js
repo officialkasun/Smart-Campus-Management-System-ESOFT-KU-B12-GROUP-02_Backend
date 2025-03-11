@@ -46,8 +46,31 @@ app.use('/api/schedules', scheduleRoutes);
 connectDB();
 
 const httpServer = createServer(app);
-// Initialize Socket.io
+
+
 const io = initIO(httpServer);
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  socket.on('searchResources', async (query) => {
+    try {
+      const resources = await Resource.find({
+        availability: true,
+        name: { $regex: query, $options: 'i' }, 
+      }).limit(10); 
+
+      socket.emit('searchResults', resources);
+    } catch (error) {
+      console.error('Error searching resources:', error);
+      socket.emit('searchError', { message: 'Something went wrong' });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
 
 // Cron job: Release expired resource reservations every minute
 cron.schedule('* * * * *', async () => {
@@ -68,7 +91,6 @@ cron.schedule('* * * * *', async () => {
 
       console.log(`Resource ${resource.name} is now available.`);
 
-      // Use getIO to get the socket instance
       const io = getIO();
       io.emit('resourceUpdated', { resourceId: resource._id, name: resource.name, status: 'available' });
     }

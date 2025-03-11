@@ -24,7 +24,24 @@ export const addResource = async (req, res) => {
   }
 };
 
-// Get all resources with reservedBy details
+//Real-time search for resources
+export const searchResources = async (req, res) => {
+  const { query } = req.query; 
+
+  try {
+    const resources = await Resource.find({
+      availability: true, 
+      name: { $regex: query, $options: 'i' }, 
+    }).limit(10);
+
+    res.status(200).json(resources);
+  } catch (error) {
+    console.error('Error searching resources:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Get resources with reservedBy details
 export const getResources = async (req, res) => {
   try {
     const resources = await Resource.find().populate('reservedBy', 'name email'); // Populate reservedBy
@@ -38,7 +55,10 @@ export const getResources = async (req, res) => {
 // Get all available resources
 export const getAvailableResources = async (req, res) => {
   try {
-    const resources = await Resource.find({ availability: true });
+    const limit = parseInt(req.params.limit) || 100;
+
+    const resources = await Resource.find({ availability: true }).limit(limit);
+
     res.status(200).json(resources);
   } catch (error) {
     console.error('Error fetching available resources:', error);
@@ -131,3 +151,20 @@ export const getResourceUsageAnalytics = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
+
+// Delete a resource
+export const deleteResource = async(req,res) => {
+  const { resourceId } = req.param.id;
+
+  try {
+    const deletedResource = await Resource.deleteOne({ _id: resourceId });
+
+    if (deletedResource.deletedCount === 0) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+    res.status(200).json({ message: "Resource deleted successfully" });
+  } catch {
+    console.error("Error deleting resource:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}

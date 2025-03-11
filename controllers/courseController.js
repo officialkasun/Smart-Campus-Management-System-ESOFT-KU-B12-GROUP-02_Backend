@@ -11,6 +11,8 @@ export const createCourse = async (req, res) => {
   const { name, code, description, schedule } = req.body;
   const instructorId = req.user._id; 
 
+  console.log('Request received for creating course:', { name, code });
+  
   try {
     const existingCourse = await Course.findOne({ code });
     if (existingCourse) {
@@ -189,3 +191,23 @@ export const getLectureMaterials = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
+
+//Delete a course
+export const deleteCourse = async (req, res) => {
+  const courseId = req.params.id;
+
+  try {
+    const deletedCourse = await Course.deleteOne({ _id: courseId });
+
+    if(deletedCourse.deletedCount === 0){
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    res.status(200).json({ message: "Course deleted successfully" });
+
+  } catch(error) {
+    console.error('Error deleting course', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+}
+

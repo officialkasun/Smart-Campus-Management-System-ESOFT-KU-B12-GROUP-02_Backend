@@ -21,10 +21,16 @@ const upload = multer({
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
 
+    console.log('File Details:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      extname: path.extname(file.originalname).toLowerCase(),
+    });
+
     if (extname && mimetype) {
-      cb(null, true);
+      cb(null, true); // Accept the file
     } else {
-      cb(new Error('Only PDF, DOC, PPT, and TXT files are allowed'));
+      cb(new Error('File format is not supported. Only PDF, DOC, PPT, and TXT files are allowed.')); // Reject the file
     }
   },
 });

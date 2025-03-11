@@ -154,7 +154,7 @@ export const getResourceUsageAnalytics = async (req, res) => {
 
 // Delete a resource
 export const deleteResource = async(req,res) => {
-  const { resourceId } = req.param.id;
+  const resourceId = req.params.id;
 
   try {
     const deletedResource = await Resource.deleteOne({ _id: resourceId });

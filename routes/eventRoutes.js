@@ -1,5 +1,5 @@
 import express from 'express';
-import { createEvent, getEvents, markAttendance, getEventsWithAttendance, getEventAttendanceAnalytics, getEventByTitle } from '../controllers/eventController.js';
+import { createEvent, getEvents, markAttendance, getEventsWithAttendance, getEventAttendanceAnalytics, getEventByTitle, deleteEvent, updateEvent } from '../controllers/eventController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
 
@@ -11,5 +11,7 @@ router.get('/with-attendance', authMiddleware, roleMiddleware(['admin']), getEve
 router.get('/analytics', authMiddleware, roleMiddleware(['admin']), getEventAttendanceAnalytics);
 router.get('/name/:eventTitle', authMiddleware, roleMiddleware(['student', 'lecturer', 'admin']), getEventByTitle);
 router.post('/:eventId/attend', authMiddleware, roleMiddleware(['student']), markAttendance);
+router.delete('/:id', authMiddleware, roleMiddleware(['admin', 'lecturer']), deleteEvent);
+router.put('/:id', authMiddleware, roleMiddleware(['admin', 'lecturer']), updateEvent);
 
 export default router;

@@ -140,14 +140,14 @@ export const assignBulkStudentsToEvent = async (req, res) => {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    const validStudents = await User.find({ 
-      _id: { $in: studentIds }, 
-      role: 'student' 
+    const validStudents = await User.find({
+      _id: { $in: studentIds },
+      role: 'student',
     });
 
-    const validStudentIds = validStudents.map(student => student._id.toString());
+    const validStudentIds = validStudents.map((student) => student._id.toString());
 
-    const newStudents = validStudentIds.filter(id => !event.attendees.includes(id));
+    const newStudents = validStudentIds.filter((id) => !event.attendees.includes(id));
 
     if (newStudents.length === 0) {
       return res.status(400).json({ message: 'No new students to add' });
@@ -156,6 +156,21 @@ export const assignBulkStudentsToEvent = async (req, res) => {
     event.attendees.push(...newStudents);
     event.attendeesCount += newStudents.length;
     await event.save();
+
+    for (const studentId of newStudents) {
+      const student = validStudents.find((s) => s._id.toString() === studentId);
+
+      if (student) {
+        await Notification.create({
+          userId: studentId,
+          message: `You have been assigned to the event: ${event.title}`,
+        });
+
+        const emailSubject = `Event Assignment: ${event.title}`;
+        const emailText = `You have been assigned to the event "${event.title}" on ${event.date}.`;
+        sendEmail(student.email, emailSubject, emailText);
+      }
+    }
 
     const eventAnalytics = await getEventAnalyticsData();
     const userAnalytics = await getUserActivityAnalyticsData();

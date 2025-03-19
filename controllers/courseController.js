@@ -231,7 +231,7 @@ export const updateCourse = async (req, res) => {
     }
 
     // Check if user is the instructor of the course or an admin
-    if (!course.instructor.equals(userId) && req.user.role !== 'admin') {
+    if (!course.instructor.equals(userId) && req.user.role !== 'admin' && req.user.role !== 'lecturer') {
       return res.status(403).json({ message: 'You are not authorized to update this course' });
     }
 

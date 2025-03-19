@@ -17,7 +17,8 @@ import courseRoutes from './routes/courseRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
 import Resource from './models/Resource.js';
-import { logger } from './utils/logger.js';
+import { requestLogger } from './middleware/requestLogger.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
@@ -36,7 +37,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(logger);
+app.use(requestLogger); 
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -50,6 +51,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/schedules', scheduleRoutes);
+
+app.use(errorHandler);
 
 connectDB();
 

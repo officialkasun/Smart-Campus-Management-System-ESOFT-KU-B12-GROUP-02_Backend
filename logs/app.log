@@ -57,3 +57,10 @@
 2025-03-19 17:25:59 [INFO]: PUT /api/events/67daae573890160224b184a2
 2025-03-19 17:25:59 [INFO]: Request Body: {"title":"Holly Festivals","description":"for BSc KU Students","date":"2025-03-28T02:45:56.946Z","location":"Colombo, Sri Lanka","organizer":"67c42582f7d53ba25a0c0cda"}
 2025-03-19 17:25:59 [INFO]: GET /api/events
+2025-03-19 18:43:04 [INFO]: PUT /api/courses/67da41bbd8d3c9711a69143e
+2025-03-19 18:43:04 [INFO]: Request Body: {"name":"Python Batch 012","code":"Py-B01","description":"Python Course","instructor":"67da3ac67c119886cd7c24de","schedule":{"day":"Saturday","startTime":"8:00 AM","endTime":"10:30 AM"},"lectureMaterials":[]}
+2025-03-19 18:43:04 [INFO]: GET /api/courses
+2025-03-19 18:43:08 [INFO]: GET /api/users/lecturer
+2025-03-19 18:43:15 [INFO]: PUT /api/courses/67da41bbd8d3c9711a69143e
+2025-03-19 18:43:15 [INFO]: Request Body: {"name":"Python Batch 01","code":"Py-B01","description":"Python Course","instructor":"67da3ac67c119886cd7c24de","schedule":{"day":"Saturday","startTime":"8:00 AM","endTime":"10:30 AM"},"lectureMaterials":[]}
+2025-03-19 18:43:15 [INFO]: GET /api/courses

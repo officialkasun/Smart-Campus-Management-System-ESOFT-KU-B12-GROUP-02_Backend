@@ -125,6 +125,51 @@ export const getEventByTitle = async (req, res) => {
   }
 };
 
+// Assign multiple students to an event
+export const assignBulkStudentsToEvent = async (req, res) => {
+  const { eventId } = req.params;
+  const { studentIds } = req.body;
+
+  try {
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({ message: 'Provide the student IDs' });
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    const validStudents = await User.find({ 
+      _id: { $in: studentIds }, 
+      role: 'student' 
+    });
+
+    const validStudentIds = validStudents.map(student => student._id.toString());
+
+    const newStudents = validStudentIds.filter(id => !event.attendees.includes(id));
+
+    if (newStudents.length === 0) {
+      return res.status(400).json({ message: 'No new students to add' });
+    }
+
+    event.attendees.push(...newStudents);
+    event.attendeesCount += newStudents.length;
+    await event.save();
+
+    const eventAnalytics = await getEventAnalyticsData();
+    const userAnalytics = await getUserActivityAnalyticsData();
+    const io = getIO();
+    io.emit('eventUpdate', eventAnalytics);
+    io.emit('userUpdate', userAnalytics);
+
+    res.status(200).json({ message: 'Students assigned successfully', event });
+  } catch (error) {
+    console.error('Error assigning students to event:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Mark attendance for an event
 export const markAttendance = async (req, res) => {
   const { eventId } = req.params;

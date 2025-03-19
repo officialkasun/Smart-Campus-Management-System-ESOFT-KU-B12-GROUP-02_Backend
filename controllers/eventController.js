@@ -100,6 +100,31 @@ export const getEvents = async (req, res) => {
   }
 };
 
+// Get events by title - supports partial name matching
+export const getEventByTitle = async (req, res) => {
+  try {
+    const searchTitle = req.params.eventTitle; // Ensure the parameter name matches the route
+    console.log('Search Title:', searchTitle); // Debug log
+
+    if (!searchTitle || typeof searchTitle !== 'string') {
+      return res.status(400).json({ message: 'Invalid search title' });
+    }
+
+    const events = await Event.find({
+      title: { $regex: searchTitle, $options: 'i' } // Case-insensitive search
+    });
+
+    if (events.length === 0) {
+      return res.status(404).json({ message: 'No events found matching this title' });
+    }
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Mark attendance for an event
 export const markAttendance = async (req, res) => {
   const { eventId } = req.params;

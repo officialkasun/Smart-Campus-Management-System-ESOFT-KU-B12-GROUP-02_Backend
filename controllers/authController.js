@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
 
-// Register a new user
+// Register a new users
 export const register = async (req, res) => {
   const { name, email, password, role } = req.body;
 

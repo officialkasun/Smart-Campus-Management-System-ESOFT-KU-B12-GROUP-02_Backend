@@ -66,17 +66,29 @@ export const getUserByName = async (req, res) => {
 // Update user role (admin only)
 export const updateUserRole = async (req, res) => {
   try {
-    const user = await User.updateOne(
-      { id: req.params.id },
-      { $set: { role: req.body.role } }
-    );
+    const userId = req.params.id;
+    const newRole = req.body.role;
 
-    if (user.modifiedCount === 0) {
-      return res.status(404).json({ message: 'Role already the same' });
+    if (!newRole || !['student', 'lecturer', 'admin'].includes(newRole)) {
+      return res.status(400).json({ message: 'Invalid role' });
     }
 
-    res.status(200).json({ message: 'The user role has been updated', user });
+    const result = await User.updateOne(
+      { id: userId }, 
+      { $set: { role: newRole } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (result.modifiedCount === 0) {
+      return res.status(200).json({ message: 'Role already the same' });
+    }
+
+    res.status(200).json({ message: 'The user role has been updated' });
   } catch (error) {
+    console.error('Error updating user role:', error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };

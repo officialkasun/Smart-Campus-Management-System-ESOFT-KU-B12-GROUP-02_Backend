@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUsers, getUserById, getUserByName, updateUserRole, getUserActivityAnalytics, changeEmail, changePassword, deleteUser, updateUser, getInstructors } from '../controllers/userController.js';
+import { getUsers, getUserById, getUserByName, updateUserRole, getUserActivityAnalytics, changeEmail, changePassword, deleteUser, updateUser, getInstructors, getStudents } from '../controllers/userController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
 
@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', authMiddleware, roleMiddleware(['admin']), getUsers);
 router.get('/lecturer', authMiddleware, roleMiddleware(['admin']), getInstructors);
+router.get('/student', authMiddleware, roleMiddleware(['admin','lecturer']), getStudents);
 router.get('/analytics', authMiddleware, roleMiddleware(['admin']), getUserActivityAnalytics);
 router.put('/:id', authMiddleware, roleMiddleware(['admin']), updateUser);
 router.get('/:id', authMiddleware, getUserById);

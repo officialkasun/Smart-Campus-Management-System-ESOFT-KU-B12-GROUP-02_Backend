@@ -22,6 +22,16 @@ export const getInstructors = async (req, res) => {
   }
 };
 
+// Get all students
+export const getStudents = async (req, res) => {
+  try {
+    const users = await User.find({ role: "student" });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Get a single user by ID
 export const getUserById = async (req, res) => {
   try {

@@ -25,18 +25,26 @@ export const addResource = async (req, res) => {
 };
 
 //Real-time search for resources
-export const searchResources = async (req, res) => {
-  const { query } = req.query; 
-
+export const getResourceByName = async (req, res) => {
   try {
+    const searchName = req.params.resourceName; 
+    console.log('Search Name:', searchName); 
+
+    if (!searchName || typeof searchName !== 'string') {
+      return res.status(400).json({ message: 'Invalid resource name' });
+    }
+
     const resources = await Resource.find({
-      availability: true, 
-      name: { $regex: query, $options: 'i' }, 
-    }).limit(10);
+      name: { $regex: searchName, $options: 'i' } 
+    });
+
+    if (resources.length === 0) {
+      return res.status(404).json({ message: 'No resources found matching this name' });
+    }
 
     res.status(200).json(resources);
   } catch (error) {
-    console.error('Error searching resources:', error);
+    console.log(error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -149,6 +157,28 @@ export const getResourceUsageAnalytics = async (req, res) => {
   } catch (error) {
     console.error('Error fetching resource usage analytics:', error);
     res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Update a resource
+export const updateResource = async (req, res) => {
+  const id = req.params.resId;
+  const { name, type } = req.body;
+
+  try {
+    const resource = await Resource.findById(id);
+    if (!resource) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+    
+    if (name) resource.name = name;
+    if (type) resource.type = type;
+
+    const updatedResource = await resource.save();
+    res.status(200).json(updatedResource);
+  } catch (error) {
+    console.error("Error updating resource:", error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 

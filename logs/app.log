@@ -1,3 +1,59 @@
 2025-03-19 15:30:28 [INFO]: GET /api/resources/name/P
 2025-03-19 15:30:28 [INFO]: Request Body: {"name":"Advanced Physics Lab","type":"lab"}
 2025-03-19 15:35:22 [INFO]: GET /api/resources/name/P
+2025-03-19 17:10:34 [INFO]: DELETE /api/events/67c453282de58bae0765c08b
+2025-03-19 17:10:34 [INFO]: GET /api/events
+2025-03-19 17:10:40 [INFO]: DELETE /api/events/67c4580cee559ec6f4183abb
+2025-03-19 17:10:40 [INFO]: GET /api/events
+2025-03-19 17:10:43 [INFO]: DELETE /api/events/67c4510593c1d0603e95f805
+2025-03-19 17:10:43 [INFO]: GET /api/events
+2025-03-19 17:10:46 [INFO]: DELETE /api/events/67c4591ddde646e78d417138
+2025-03-19 17:10:46 [INFO]: GET /api/events
+2025-03-19 17:10:49 [INFO]: DELETE /api/events/67c45a4864e71ad43d5712a5
+2025-03-19 17:10:49 [INFO]: GET /api/events
+2025-03-19 17:10:53 [INFO]: DELETE /api/events/67c18e196a9024f7444b2ff0
+2025-03-19 17:10:54 [INFO]: GET /api/events
+2025-03-19 17:10:59 [INFO]: DELETE /api/events/67daa9f8b2cb149916d6a1c3
+2025-03-19 17:10:59 [INFO]: GET /api/events
+2025-03-19 17:11:02 [INFO]: DELETE /api/events/67d2ea93de8047f7c44b6078
+2025-03-19 17:11:02 [INFO]: GET /api/events
+2025-03-19 17:11:05 [INFO]: DELETE /api/events/67d683828994cf55a43b3664
+2025-03-19 17:11:05 [INFO]: GET /api/events
+2025-03-19 17:11:09 [INFO]: DELETE /api/events/67d683828994cf55a43b365a
+2025-03-19 17:11:09 [INFO]: GET /api/events
+2025-03-19 17:11:12 [INFO]: DELETE /api/events/67d683828994cf55a43b365d
+2025-03-19 17:11:12 [INFO]: GET /api/events
+2025-03-19 17:11:14 [INFO]: DELETE /api/events/67d683178994cf55a43b3642
+2025-03-19 17:11:14 [INFO]: GET /api/events
+2025-03-19 17:11:17 [INFO]: DELETE /api/events/67d682618994cf55a43b3625
+2025-03-19 17:11:17 [INFO]: GET /api/events
+2025-03-19 17:11:20 [INFO]: DELETE /api/events/67d2eaaade8047f7c44b6098
+2025-03-19 17:11:20 [INFO]: GET /api/events
+2025-03-19 17:11:23 [INFO]: DELETE /api/events/67d2ea95de8047f7c44b6088
+2025-03-19 17:11:23 [INFO]: GET /api/events
+2025-03-19 17:13:56 [INFO]: GET /api/users
+2025-03-19 17:15:27 [INFO]: POST /api/events
+2025-03-19 17:15:27 [INFO]: Request Body: {"title":"Holly Festival","description":"for BSc KU Students","date":"2025-03-29T02:45:56.946Z","location":"Colombo, Sri Lanka","organizer":"67c42582f7d53ba25a0c0cda"}
+2025-03-19 17:15:27 [INFO]: GET /api/events
+2025-03-19 17:15:46 [INFO]: DELETE /api/events/67c18e196a9024f7444b2ff0
+2025-03-19 17:15:50 [INFO]: GET /api/events
+2025-03-19 17:16:57 [INFO]: GET /api/events
+2025-03-19 17:23:19 [INFO]: GET /api/events
+2025-03-19 17:23:19 [INFO]: GET /api/events
+2025-03-19 17:23:25 [INFO]: GET /api/users
+2025-03-19 17:23:52 [INFO]: PUT /api/events/67daae573890160224b184a2
+2025-03-19 17:23:52 [INFO]: Request Body: {"title":"Holly Festivals","description":"for BSc KU Studentst","date":"2025-03-27T23:45:56.946Z","location":"Colombo, Sri Lankas","organizer":"67c099e4baafb6776146a974"}
+2025-03-19 17:23:52 [INFO]: GET /api/events
+2025-03-19 17:23:59 [INFO]: GET /api/users
+2025-03-19 17:25:03 [INFO]: PUT /api/events/67daae573890160224b184a2
+2025-03-19 17:25:03 [INFO]: Request Body: {"title":"Holly Festivals","description":"for BSc KU Studentst","date":"2025-03-27T23:45:56.946Z","location":"Colombo, Sri Lankas","organizer":"67bf60cebc8df970b9232802"}
+2025-03-19 17:25:03 [INFO]: GET /api/events
+2025-03-19 17:25:07 [INFO]: GET /api/users
+2025-03-19 17:25:10 [INFO]: PUT /api/events/67daae573890160224b184a2
+2025-03-19 17:25:10 [INFO]: Request Body: {"title":"Holly Festivals","description":"for BSc KU Studentst","date":"2025-03-27T23:45:56.946Z","location":"Colombo, Sri Lankas","organizer":"67c42582f7d53ba25a0c0cda"}
+2025-03-19 17:25:11 [INFO]: GET /api/events
+2025-03-19 17:25:42 [INFO]: GET /api/events
+2025-03-19 17:25:44 [INFO]: GET /api/users
+2025-03-19 17:25:59 [INFO]: PUT /api/events/67daae573890160224b184a2
+2025-03-19 17:25:59 [INFO]: Request Body: {"title":"Holly Festivals","description":"for BSc KU Students","date":"2025-03-28T02:45:56.946Z","location":"Colombo, Sri Lanka","organizer":"67c42582f7d53ba25a0c0cda"}
+2025-03-19 17:25:59 [INFO]: GET /api/events

@@ -186,7 +186,7 @@ export const getEventAttendanceAnalytics = async (req, res) => {
 //Update an event
 export const updateEvent = async (req, res) => {
   const eventId = req.params.id;
-  const { title, description, date, location } = req.body;
+  const { title, description, date, location, organizer } = req.body;
   const userId = req.user._id;
 
   try {
@@ -203,6 +203,8 @@ export const updateEvent = async (req, res) => {
         description,
         date,
         location,
+        organizer,
+        updatedAt: new Date(),
       },
       { new: true, runValidators: true }
     ).populate('organizer', 'name email');

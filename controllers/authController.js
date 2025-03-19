@@ -62,7 +62,7 @@ export const login = async (req, res) => {
       }
     }
 
-    const token = jwt.sign({_id: user._id, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({_id: user._id, id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
     res.status(200).json({ user, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });

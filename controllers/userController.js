@@ -12,6 +12,16 @@ export const getUsers = async (req, res) => {
   }
 };
 
+// Get all instructors
+export const getInstructors = async (req, res) => {
+  try {
+    const users = await User.find({ role: "lecturer" });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Get a single user by ID
 export const getUserById = async (req, res) => {
   try {
@@ -20,6 +30,24 @@ export const getUserById = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Get a single user by Name
+export const getUserByName = async (req, res) => {
+  try {
+    const searchName = req.params.name;
+    // Use regex for partial matching with case insensitivity
+    const users = await User.find({
+      name: { $regex: searchName, $options: 'i' }
+    });
+    
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No users found matching this name' });
+    }
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
@@ -39,6 +67,53 @@ export const updateUserRole = async (req, res) => {
 
     res.status(200).json({ message: 'The user role has been updated', user });
   } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Update user (admin only)
+export const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+  
+  // Check for attempting to update password directly - should be done through changePassword
+  if (updateData.password) {
+    return res.status(400).json({ message: 'Password cannot be updated through this endpoint' });
+  }
+  
+  try {
+    // Find the user first to check if they exist
+    const userExists = await User.findOne({_id: req.params.id});
+    if (!userExists) {
+      return res.status(404).json({ message: 'User not founds ' + id  });
+    }
+    
+    // Update the user
+    const user = await User.findOneAndUpdate(
+      { _id : id },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not foundsss ' + id });
+    }
+
+    res.status(200).json({ 
+      message: 'User has been successfully updated', 
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+        // Add other fields you want to return
+      } 
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Something went wrong' });
   }
 };

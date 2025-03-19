@@ -8,10 +8,10 @@ import { sendEmail } from '../utils/emailSender.js';
 
 // Create a new course (instructor only) with file upload
 export const createCourse = async (req, res) => {
-  const { name, code, description, schedule } = req.body;
-  const instructorId = req.user._id; 
+  const { name, code, description, schedule, instructor } = req.body;
+  const instructorId = instructor || req.user._id; 
 
-  console.log('Request received for creating course:', { name, code });
+  console.log('Request received for creating course:', { name, code, instructor });
   
   try {
     const existingCourse = await Course.findOne({ code });
@@ -120,7 +120,7 @@ export const getCourseById = async (req, res) => {
   const userId = req.user._id; 
 
   try {
-    const course = await Course.findById(courseId)
+    const course = await Course.findOne({ code: courseId })
       .populate('instructor', 'name email') 
       .populate('students', 'name email'); 
 
@@ -128,18 +128,39 @@ export const getCourseById = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Check if the user is the instructor or a student enrolled in the course
+    // Check if the user is the instructor or a student enrolled in the course / an admin
     const isInstructor = course.instructor._id.equals(userId);
     const isStudent = course.students.some((student) => student._id.equals(userId));
 
-    if (!isInstructor && !isStudent) {
-      return res.status(403).json({ message: 'You are not authorized to view this course' });
+    if (!isInstructor && !isStudent && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You are not authorized to view this course'  });
     }
 
     res.status(200).json(course);
   } catch (error) {
     console.error('Error fetching course:', error);
     res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Get course by courseName - supports partial name matching
+export const getCourseByName = async (req, res) => {
+
+  
+  
+  try {
+    const searchName = req.params.courseName;
+    // Use regex for partial matching with case insensitivity
+    const users = await Course.find({
+      name: { $regex: searchName, $options: 'i' }
+    });
+    
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No courses found matching this name' });
+    }
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong'});
   }
 };
 
@@ -189,6 +210,89 @@ export const getLectureMaterials = async (req, res) => {
   } catch (error) {
     console.error('Error fetching lecture materials:', error);
     res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+// Update an existing course
+export const updateCourse = async (req, res) => {
+  const courseId = req.params.id;
+  const { name, code, description, schedule, instructor } = req.body;
+  const userId = req.user._id;
+
+  console.log('Request received for updating course:', { name, code, instructor });
+  
+
+  try {
+    // Find the course to update
+    const course = await Course.findById(courseId);
+    
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Check if user is the instructor of the course or an admin
+    if (!course.instructor.equals(userId) && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You are not authorized to update this course' });
+    }
+
+    // Handle new lecture materials if uploaded
+    let lectureMaterials = course.lectureMaterials;
+    if (req.files && req.files.length > 0) {
+      // Add the new lecture materials to the existing ones
+      const newMaterials = req.files.map(file => file.path);
+      lectureMaterials = [...lectureMaterials, ...newMaterials];
+    }
+
+    // Update the course
+    const updatedCourse = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        name,
+        code,
+        description,
+        schedule,
+        instructor,
+        lectureMaterials
+      },
+      { new: true, runValidators: true }
+    ).populate('instructor', 'name email');
+
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Notify enrolled students about the course update
+    const enrolledStudents = course.students;
+    if (enrolledStudents.length > 0) {
+      const students = await User.find({ _id: { $in: enrolledStudents } });
+      
+      students.forEach(async (student) => {
+        await Notification.create({
+          userId: student._id,
+          message: `The course ${course.name} (${course.code}) has been updated.`,
+        });
+        
+        // Optionally send email notification
+        const emailSubject = `Course Update: ${course.name}`;
+        const emailText = `The course ${course.name} (${course.code}) has been updated.\n\nUpdated schedule: ${updatedCourse.schedule.day}, ${updatedCourse.schedule.startTime} - ${updatedCourse.schedule.endTime}`;
+        sendEmail(student.email, emailSubject, emailText);
+      });
+    }
+
+    res.status(200).json({ message: 'Course updated successfully', course: updatedCourse });
+  } catch (error) {
+    console.error('Error updating course:', error);
+    
+    // If there was an error and new files were uploaded, clean them up
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        fs.unlink(file.path, (err) => {
+          if (err) console.error('Error cleaning up uploaded file:', err);
+        });
+      });
+    }
+    
+    res.status(500).json({ message: 'Something went wrong while updating the course' });
   }
 };
 

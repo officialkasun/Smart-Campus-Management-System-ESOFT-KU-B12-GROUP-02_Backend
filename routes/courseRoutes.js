@@ -1,12 +1,13 @@
 import express from 'express';
 import upload from '../utils/multerConfig.js';
-import { getCourses, registerForCourse, getStudentSchedule, createCourse, getCourseById, getCourseByName, getLectureMaterials, deleteCourse, updateCourse } from '../controllers/courseController.js';
+import { getCourses, registerForCourse, getLecturerCourses, getStudentSchedule, createCourse, getCourseById, getCourseByName, getLectureMaterials, deleteCourse, updateCourse } from '../controllers/courseController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import {roleMiddleware } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', authMiddleware, getCourses);
+router.get('/lecturer', authMiddleware, getLecturerCourses);
 router.get('/schedule', authMiddleware, getStudentSchedule);
 // Create a new course with file uploade
 router.post(

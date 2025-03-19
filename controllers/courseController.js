@@ -57,6 +57,18 @@ export const getCourses = async (req, res) => {
   }
 };
 
+// Get all courses for specific lecturer (Logged in user)
+export const getLecturerCourses = async (req, res) => {
+  const lecturerId = req.user._id;
+
+  try {
+    const courses = await Course.find({ instructor: lecturerId }).populate('instructor', 'name email');
+    res.status(200).json(courses);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Register for a course
 export const registerForCourse = async (req, res) => {
   const courseId = req.params.courseId;

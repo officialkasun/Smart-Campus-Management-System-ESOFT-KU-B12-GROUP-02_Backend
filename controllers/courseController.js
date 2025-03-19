@@ -216,7 +216,7 @@ export const getLectureMaterials = async (req, res) => {
 // Update an existing course
 export const updateCourse = async (req, res) => {
   const courseId = req.params.id;
-  const { name, code, description, schedule, instructor } = req.body;
+  const { name, code, description, schedule, instructor, lectureMaterials } = req.body;
   const userId = req.user._id;
 
   console.log('Request received for updating course:', { name, code, instructor });
@@ -236,8 +236,7 @@ export const updateCourse = async (req, res) => {
     }
 
     // Handle new lecture materials if uploaded
-    let lectureMaterials = course.lectureMaterials;
-    if (req.files && req.files.length > 0) {
+ if (req.files && req.files.length > 0) {
       // Add the new lecture materials to the existing ones
       const newMaterials = req.files.map(file => file.path);
       lectureMaterials = [...lectureMaterials, ...newMaterials];

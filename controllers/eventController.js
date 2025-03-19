@@ -158,6 +158,38 @@ export const markAttendance = async (req, res) => {
   }
 };
 
+// Delete an attendee from an event
+export const deleteAttendee = async (req, res) => {
+  const { eventId, attendeeId } = req.params;
+
+  try {
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (!event.attendees.includes(attendeeId)) {
+      return res.status(400).json({ message: 'Attendee not found in this event' });
+    }
+
+    event.attendees = event.attendees.filter((id) => id.toString() !== attendeeId);
+    event.attendeesCount -= 1;
+
+    await event.save();
+
+    const eventAnalytics = await getEventAnalyticsData();
+    const userAnalytics = await getUserActivityAnalyticsData();
+    const io = getIO();
+    io.emit('eventUpdate', eventAnalytics);
+    io.emit('userUpdate', userAnalytics);
+
+    res.status(200).json({ message: 'Attendee removed successfully', event });
+  } catch (error) {
+    console.error('Error deleting attendee:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Get events with attendance
 export const getEventsWithAttendance = async (req, res) => {
   try {

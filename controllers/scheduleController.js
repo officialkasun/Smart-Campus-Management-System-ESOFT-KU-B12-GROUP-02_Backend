@@ -115,7 +115,7 @@ export const addEventToStudentSchedule = async (req, res) => {
 };
 
 
-// The rest of your getStudentScheduleById function remains the same
+// The rest of your getStudentScheduleById 
 export const getStudentScheduleById = async (req, res) => {
   const { stuId } = req.params;
   const requestingUser = req.user;

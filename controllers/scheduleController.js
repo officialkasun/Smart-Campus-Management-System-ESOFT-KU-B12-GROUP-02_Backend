@@ -23,6 +23,32 @@ export const addEventToSchedule = async (req, res) => {
     }
 };
 
+
+// Add Event to Schedule
+export const addEventToScheduleByAdmin = async (req, res) => {
+    const { studentId, events } = req.body;
+
+    const { title, description, date, location, type } = events;
+  
+    try {
+        let schedule = await Schedule.findOne({ studentId });
+    
+        if (!schedule) {
+            schedule = await Schedule.create({ studentId, events: [] });
+        }
+        
+        
+    
+        schedule.events.push({ title, description, date, location, type });
+        await schedule.save();
+  
+      res.status(201).json(schedule);
+    } catch (error) {
+        console.error('Error adding event to schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
 // Get student schedule
 export const getStudentSchedule = async (req, res) => {
     const studentId = req.user._id;
@@ -36,6 +62,22 @@ export const getStudentSchedule = async (req, res) => {
         res.status(200).json(schedule);
     } catch (error) {
         console.error('Error fetching schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
+
+// Get all student schedules for admin
+export const getStudentScheduleByAdmin = async (req, res) => {
+    try {
+        const schedules = await Schedule.find().populate('studentId', 'name email');
+        if (!schedules || schedules.length === 0) {
+            return res.status(404).json({ message: 'No schedules found' });
+        }
+    
+        res.status(200).json(schedules);
+    } catch (error) {
+        console.error('Error fetching schedules:', error);
         res.status(500).json({ message: 'Something went wrong' });
     }
 };

@@ -134,6 +134,43 @@ export const deleteEventFromSchedule = async (req, res) => {
     }
 };
 
+export const deleteEventFromScheduleCompletely = async (req, res) => {
+  
+    const { eventId } = req.params; 
+    
+  
+    try {
+        const schedule = await Schedule.deleteOne({ _id: eventId });
+ 
+  
+        res.status(200).json({message: "The event has been deleted.",schedule});
+    } catch (error) {
+        console.error('Error deleting event from schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
+
+export const deleteEventFromScheduleByAdmin = async (req, res) => {
+  
+    const { eventId , studentId } = req.params; 
+  
+    try {
+        const schedule = await Schedule.findOne({ studentId: studentId });
+        if (!schedule) {
+            return res.status(404).json({ message: 'Schedule not found' });
+        }
+    
+        schedule.events.pull(eventId);
+        await schedule.save();
+  
+        res.status(200).json({message: "The event has been deleted.",schedule});
+    } catch (error) {
+        console.error('Error deleting event from schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
 // Add event to a student's schedule (admin/lecturer only)
 export const addEventToStudentSchedule = async (req, res) => {
   const {  title, description, date, location, type } = req.body;

@@ -82,6 +82,23 @@ export const getStudentByName = async (req, res) => {
   }
 };
 
+// Get a single student by ID
+export const getStudentById = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      id: req.params.id,
+      role: "student" // Add filter for student role
+    });
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Update user role (admin only)
 export const updateUserRole = async (req, res) => {
   try {

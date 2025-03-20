@@ -333,3 +333,6 @@
 2025-03-20 09:23:35 [INFO]: GET /api/users/student/name/r
 2025-03-20 09:23:37 [INFO]: GET /api/users/student/name/rx
 >>>>>>> 2f202beac76fe61a7e28d43593c75dc9a5f20342
+2025-03-20 09:39:26 [INFO]: GET /api/users/student/U-0001
+2025-03-20 09:39:29 [INFO]: GET /api/users/student/U-0003
+2025-03-20 09:39:33 [INFO]: GET /api/users/student/0001

@@ -1,4 +1,5 @@
 import Schedule from '../models/Schedule.js';
+import User from '../models/User.js';
 
 // Add Event to Schedule
 export const addEventToSchedule = async (req, res) => {
@@ -42,11 +43,11 @@ export const getStudentSchedule = async (req, res) => {
 // Update event in schedule
 export const updateEventInSchedule = async (req, res) => {
     const studentId = req.user._id; 
-    const { eventId } = req.params; 
+    const { eventId } = req.params.eventId; 
     const { title, description, date, location, type } = req.body;
   
     try {
-      const schedule = await Schedule.findOne({ studentId });
+      const schedule = await Schedule.findOne({_id: studentId });
       if (!schedule) {
         return res.status(404).json({ message: 'Schedule not found' });
       }
@@ -73,10 +74,10 @@ export const updateEventInSchedule = async (req, res) => {
 
 export const deleteEventFromSchedule = async (req, res) => {
     const studentId = req.user._id; 
-    const { eventId } = req.params; 
+    const { eventId } = req.params.eventId; 
   
     try {
-        const schedule = await Schedule.findOne({ studentId });
+        const schedule = await Schedule.findOne({ _id: studentId });
         if (!schedule) {
             return res.status(404).json({ message: 'Schedule not found' });
         }
@@ -89,4 +90,54 @@ export const deleteEventFromSchedule = async (req, res) => {
         console.error('Error deleting event from schedule:', error);
         res.status(500).json({ message: 'Something went wrong' });
     }
+};
+
+// Add event to a student's schedule (admin/lecturer only)
+export const addEventToStudentSchedule = async (req, res) => {
+  const {  title, description, date, location, type } = req.body;
+  const studentId = req.params.stuId;
+
+  try {
+    let schedule = await Schedule.findOne({ studentId: studentId });
+
+    if (!schedule) {
+      schedule = await Schedule.create({ studentId, events: [] });
+    }
+
+    schedule.events.push({ title, description, date, location, type });
+    await schedule.save();
+
+    res.status(201).json(schedule);
+  } catch (error) {
+    console.error('Error adding event to student schedule:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+
+// The rest of your getStudentScheduleById function remains the same
+export const getStudentScheduleById = async (req, res) => {
+  const { stuId } = req.params;
+  const requestingUser = req.user;
+
+  try {
+    if (requestingUser.role !== 'admin' && requestingUser.role !== 'lecturer') {
+      return res.status(403).json({ message: 'You are not authorized to access this resource' });
+    }
+
+    const student = await User.findById(stuId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const schedule = await Schedule.findOne({ studentId: stuId }).populate('studentId', 'name email');
+    if (!schedule) {
+      return res.status(404).json({ message: 'Schedule not found for this student' });
+    }
+
+    res.status(200).json(schedule);
+  } catch (error) {
+    console.error('Error fetching student schedule by ID:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 };

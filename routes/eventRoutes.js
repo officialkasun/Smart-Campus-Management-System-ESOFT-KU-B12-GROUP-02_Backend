@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/', authMiddleware, createEvent);
 router.get('/', authMiddleware, getEvents);
-router.get('/with-attendance', authMiddleware, roleMiddleware(['admin']), getEventsWithAttendance);
+router.get('/with-attendance', authMiddleware, roleMiddleware(['admin', 'lecturer']), getEventsWithAttendance);
 router.get('/analytics', authMiddleware, roleMiddleware(['admin']), getEventAttendanceAnalytics);
 router.get('/name/:eventTitle', authMiddleware, roleMiddleware(['student', 'lecturer', 'admin']), getEventByTitle);
 router.post('/:eventId/attend', authMiddleware, roleMiddleware(['student']), markAttendance);

@@ -100,3 +100,4 @@
 2025-03-19 22:46:19 [INFO]: POST /api/events/67daae573890160224b184a2/bulk
 2025-03-19 22:46:19 [INFO]: Request Body: {"studentIds":["67bf60cebc8df970b9232802","67dabe52904b9a221ce37c7f","67c099e4baafb6776146a974"]}
 2025-03-19 22:46:20 [INFO]: GET /api/events/with-attendance
+2025-03-20 06:25:47 [INFO]: GET /

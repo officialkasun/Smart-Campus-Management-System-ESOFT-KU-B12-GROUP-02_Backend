@@ -111,6 +111,6 @@ cron.schedule('* * * * *', async () => {
 });
 
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-module.exports = app; // Correct export for Vercel
+export default app; // Use ES module export

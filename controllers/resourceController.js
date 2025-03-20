@@ -160,6 +160,45 @@ export const getResourceUsageAnalytics = async (req, res) => {
   }
 };
 
+// Delete a reservation
+export const deleteReservation = async (req, res) => {
+  const resourceId = req.params.resId;
+  const userId = req.user._id;
+  const userRole = req.user.role;
+  
+  try {
+    const resource = await Resource.findById(resourceId);
+    
+    if (!resource) {
+      return res.status(404).json({ message: 'Resource not found' });
+    }
+  
+    if (resource.availability) {
+      return res.status(400).json({ message: 'Resource is not currently reserved' });
+    }
+    
+    if (userRole !== 'admin' && !resource.reservedBy.equals(userId)) {
+      return res.status(403).json({ message: 'You are not authorized to delete this reservation' });
+    }
+    
+    resource.availability = true;
+    resource.reservedBy = null;
+    resource.reservationDate = null;
+    resource.reservationExpiry = null;
+    
+    await resource.save();
+    
+    const analytics = await getResourceUsageAnalyticsData();
+    const io = getIO();
+    io.emit('resourceUpdate', analytics);
+    
+    res.status(200).json({ message: 'Reservation deleted successfully', resource });
+  } catch (error) {
+    console.error('Error deleting reservation:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Update a resource
 export const updateResource = async (req, res) => {
   const id = req.params.resId;

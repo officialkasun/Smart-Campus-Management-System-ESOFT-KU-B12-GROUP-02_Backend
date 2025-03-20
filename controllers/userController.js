@@ -63,6 +63,25 @@ export const getUserByName = async (req, res) => {
   }
 };
 
+// Get a single student by Name
+export const getStudentByName = async (req, res) => {
+  try {
+    const searchName = req.params.name;
+    // Use regex for partial matching with case insensitivity and filter by student role
+    const users = await User.find({
+      name: { $regex: searchName, $options: 'i' },
+      role: "student" // Add filter for student role
+    });
+    
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No students found matching this name' });
+    }
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Update user role (admin only)
 export const updateUserRole = async (req, res) => {
   try {

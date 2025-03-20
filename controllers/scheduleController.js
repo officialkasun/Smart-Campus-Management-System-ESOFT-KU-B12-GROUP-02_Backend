@@ -23,6 +23,32 @@ export const addEventToSchedule = async (req, res) => {
     }
 };
 
+
+// Add Event to Schedule
+export const addEventToScheduleByAdmin = async (req, res) => {
+    const { studentId, events } = req.body;
+
+    const { title, description, date, location, type } = events;
+  
+    try {
+        let schedule = await Schedule.findOne({ studentId });
+    
+        if (!schedule) {
+            schedule = await Schedule.create({ studentId, events: [] });
+        }
+        
+        
+    
+        schedule.events.push({ title, description, date, location, type });
+        await schedule.save();
+  
+      res.status(201).json(schedule);
+    } catch (error) {
+        console.error('Error adding event to schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
 // Get student schedule
 export const getStudentSchedule = async (req, res) => {
     const studentId = req.user._id;
@@ -36,6 +62,22 @@ export const getStudentSchedule = async (req, res) => {
         res.status(200).json(schedule);
     } catch (error) {
         console.error('Error fetching schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
+
+// Get all student schedules for admin
+export const getStudentScheduleByAdmin = async (req, res) => {
+    try {
+        const schedules = await Schedule.find().populate('studentId', 'name email');
+        if (!schedules || schedules.length === 0) {
+            return res.status(404).json({ message: 'No schedules found' });
+        }
+    
+        res.status(200).json(schedules);
+    } catch (error) {
+        console.error('Error fetching schedules:', error);
         res.status(500).json({ message: 'Something went wrong' });
     }
 };
@@ -78,6 +120,43 @@ export const deleteEventFromSchedule = async (req, res) => {
   
     try {
         const schedule = await Schedule.findOne({ _id: studentId });
+        if (!schedule) {
+            return res.status(404).json({ message: 'Schedule not found' });
+        }
+    
+        schedule.events.pull(eventId);
+        await schedule.save();
+  
+        res.status(200).json({message: "The event has been deleted.",schedule});
+    } catch (error) {
+        console.error('Error deleting event from schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
+export const deleteEventFromScheduleCompletely = async (req, res) => {
+  
+    const { eventId } = req.params; 
+    
+  
+    try {
+        const schedule = await Schedule.deleteOne({ _id: eventId });
+ 
+  
+        res.status(200).json({message: "The event has been deleted.",schedule});
+    } catch (error) {
+        console.error('Error deleting event from schedule:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+};
+
+
+export const deleteEventFromScheduleByAdmin = async (req, res) => {
+  
+    const { eventId , studentId } = req.params; 
+  
+    try {
+        const schedule = await Schedule.findOne({ studentId: studentId });
         if (!schedule) {
             return res.status(404).json({ message: 'Schedule not found' });
         }

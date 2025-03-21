@@ -15,13 +15,13 @@ router.get('/:stuId', authMiddleware, roleMiddleware(['admin', 'lecturer']), get
 
 router.get('/', authMiddleware, roleMiddleware(['student']), getStudentSchedule);
 
-router.get('/event', authMiddleware, roleMiddleware(['admin']), getStudentScheduleByAdmin);
-router.post('/', authMiddleware, roleMiddleware(['student' , 'admin']), addEventToSchedule);
+router.get('/event', authMiddleware, roleMiddleware(['admin','lecturer']), getStudentScheduleByAdmin);
+router.post('/', authMiddleware, roleMiddleware(['student' , 'admin','lecturer']), addEventToSchedule);
 router.post('/event', authMiddleware, roleMiddleware(['admin']), addEventToScheduleByAdmin);
-router.put('/events/:eventId', authMiddleware, roleMiddleware(['student' , 'admin']), updateEventInSchedule);
+router.put('/events/:eventId', authMiddleware, roleMiddleware(['student' , 'admin','lecturer']), updateEventInSchedule);
 router.delete('/events/:eventId', authMiddleware, roleMiddleware(['student']), deleteEventFromSchedule);
-router.delete('/events/complete/:eventId', authMiddleware, roleMiddleware([ 'admin']), deleteEventFromScheduleCompletely);
-router.delete('/events/event/:studentId/:eventId', authMiddleware, roleMiddleware(['admin']), deleteEventFromScheduleByAdmin);
+router.delete('/events/complete/:eventId', authMiddleware, roleMiddleware([ 'admin','lecturer']), deleteEventFromScheduleCompletely);
+router.delete('/events/event/:studentId/:eventId', authMiddleware, roleMiddleware(['admin','lecturer']), deleteEventFromScheduleByAdmin);
 
 
 export default router;

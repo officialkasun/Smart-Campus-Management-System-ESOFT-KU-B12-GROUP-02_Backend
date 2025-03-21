@@ -200,6 +200,12 @@ export const getStudentScheduleById = async (req, res) => {
   const requestingUser = req.user;
 
   try {
+    // Special case for "event" route - return all events instead of searching by ID
+    if (stuId === 'event') {
+      const events = await Schedule.find({}).populate('studentId', 'name email');
+      return res.status(200).json(events);
+    }
+
     if (requestingUser.role !== 'admin' && requestingUser.role !== 'lecturer') {
       return res.status(403).json({ message: 'You are not authorized to access this resource' });
     }

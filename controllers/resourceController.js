@@ -60,6 +60,18 @@ export const getResources = async (req, res) => {
   }
 };
 
+// Get resources with reservedByMe details
+export const getResourcesByMe = async (req, res) => {
+  const userId = req.user._id;
+  try {
+    const resources = await Resource.find({ reservedBy: userId }).populate('reservedBy', 'name email');
+    res.status(200).json(resources);
+  } catch (error) {
+    console.error('Error fetching resources:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 // Get all available resources
 export const getAvailableResources = async (req, res) => {
   try {
